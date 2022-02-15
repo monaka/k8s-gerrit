@@ -36,7 +36,8 @@ jobs:
           - 3.3.7
           - 3.3.8
           - 3.3.9
-          
+      max-parallel: 1
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -84,6 +85,18 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
         id: build-base
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: container-images/base
+          push: false
+          tags: latest
+          labels: ${{ steps.meta.outputs.labels }}
+          args: GERRIT_WAR_URL=https://gerrit-releases.storage.googleapis.com/gerrit-${{ matrix.release }}.war
+
+      # Build base Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-gerrit-base
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: container-images/gerrit-base
